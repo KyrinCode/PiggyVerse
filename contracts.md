@@ -108,3 +108,46 @@ PiggyTasks: 0xAc6d460626c4D37044e5d182e11366edBdC3B007
 | 14. addLockedDiary(e)                          | Effie 发布加密日记，发布之前通过 encodeDiary 得到密文 e，发布后可在 getByEffieLockedIds 中查看 diaryId。 |
 | 21. unlockDiary(diaryId, secret)               | Kyrin 解锁加密日记，拿到 secret 后首先通过 viewLockedDiary 验证再解锁，解锁后密文会被明文覆盖，消耗 3PP，其中 1PP会转给 Effie。 |
 
+
+
+```
+6. ToEffieIds: 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23
+// 10. ToKyrinDoneIds: 1
+11. ToKyrinIds: 0, 2, 3, 4, 5, 6, 7, 20
+12. ToKyrinOnSaleIds: 0
+// 13. ToKyrinSaledIds: 0
+
+Sale
+0: 免生气卡 cnt 1
+
+Award
+0: 和外人自由玩耍卡（0点后回消耗两张） cnt 4
+2: 寿司卡 cnt 1
+3: 0点早睡卡 cnt 2
+4: 拍p卡 cnt 2
+5: 叫“元元霸霸”卡 cnt 4
+6: 蹂躏卡 cnt 1
+7: 泳衣卡 cnt 1
+20: 免生气卡 cnt 1
+
+8: 鲜榨果汁卡 cnt 2
+9: 被拍p卡 cnt 1
+10: 请客卡 cnt 1
+11: 鸡排卡 cnt 1
+12: 滑雪卡 cnt 1
+13: 哭鼻子卡（元元主动被拍）cnt 3
+14: 拍p卡 cnt 3
+15: 达美乐卡 cnt 1
+16: 四季民福烤鸭卡 cnt 1
+17: 小裙子卡 cnt 1
+18: 滑板体验卡 cnt 1
+19: 远足卡 cnt 1
+21: 摸摸腹肌卡 cnt 1
+22: 洗碗卡 cnt 10
+23: 摸摸胸肌卡 cnt 1
+24: 全天保姆卡 cnt 2
+```
+
+
+
+待改：加上前端后 id用 keccek name 来做，addAward的时候可以直接算出id

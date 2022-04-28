@@ -20,10 +20,10 @@ interface P_A {
 	function deleteOnSale(uint saleId, address sender) external;
 	function cancelOnSale(uint saleId, address sender) external;
 	function changeOnSaleLongTerm(uint saleId, address sender) external;
-	function buyOnSale(uint saleId, address sender) external;
+	function buyOnSale(uint saleId, uint cnt, address sender) external;
 	function addAward(string memory name, uint cnt, address sender) external;
-	function finishAward(uint awardId, address sender) external;
-	function changeAwardCnt(uint awardId, uint cnt, address sender) external;
+	function finishAward(uint awardId, uint cnt, address sender) external;
+	function addAwardCnt(uint awardId, uint cnt, address sender) external;
 }
 
 interface P_T {
@@ -220,17 +220,17 @@ contract PiggyVerse{
 	function PiggyAwards_changeOnSaleLongTerm(uint saleId) public {
 		return PiggyAwards.changeOnSaleLongTerm(saleId, msg.sender);
 	}
-	function PiggyAwards_buyOnSale(uint saleId) public {
-		return PiggyAwards.buyOnSale(saleId, msg.sender);
+	function PiggyAwards_buyOnSale(uint saleId, uint cnt) public {
+		return PiggyAwards.buyOnSale(saleId, cnt, msg.sender);
 	}
 	function PiggyAwards_addAward(string memory name, uint cnt) public {
 		return PiggyAwards.addAward(name, cnt, msg.sender);
 	}
-	function PiggyAwards_finishAward(uint awardId) public {
-		return PiggyAwards.finishAward(awardId, msg.sender);
+	function PiggyAwards_addAwardCnt(uint awardId, uint cnt) public {
+		return PiggyAwards.addAwardCnt(awardId, cnt, msg.sender);
 	}
-	function PiggyAwards_changeAwardCnt(uint awardId, uint cnt) public {
-		return PiggyAwards.changeAwardCnt(awardId, cnt, msg.sender);
+	function PiggyAwards_finishAward(uint awardId, uint cnt) public {
+		return PiggyAwards.finishAward(awardId, cnt, msg.sender);
 	}
 
 	/* ------------------------ PiggyTasks ------------------------ */

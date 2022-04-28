@@ -57,8 +57,8 @@ contract PiggyAwards {
     event OnSaleLongTermChanged(uint saleId, bool longTerm);
     event OnSaleBought(uint saleId);
     event AwardAdded(uint awardId, string name, uint cnt);
+    event AwardCntAdded(uint awardId, uint cnt);
     event AwardFinished(uint awardId);
-    event AwardCntChanged(uint awardId, uint cnt);
 
     /* ------------------------ Management ------------------------ */
 
@@ -152,7 +152,8 @@ contract PiggyAwards {
     function getAwardById(uint awardId) public view returns(string memory){
         string memory name = string(abi.encodePacked("[Name] ", awards[awardId].name));
         string memory cnt = string(abi.encodePacked(" [Cnt] ", Utils.toString(awards[awardId].cnt)));
-        string memory award = string(abi.encodePacked(name, cnt));
+        string memory left = string(abi.encodePacked(" [Left] ", Utils.toString(awards[awardId].left)));
+        string memory award = string(abi.encodePacked(name, cnt, left));
         return award;
     }
 
@@ -204,9 +205,10 @@ contract PiggyAwards {
         emit OnSaleLongTermChanged(saleId, sales[saleId].longTerm);
     }
 
-    function buyOnSale(uint saleId, address sender) public onlyPiggyVerse {
+    function buyOnSale(uint saleId, uint cnt, address sender) public onlyPiggyVerse {
         require(sender == P_V(PiggyVerse).effie() && Utils.inlist(saleId, toEffieOnSale) || sender == P_V(PiggyVerse).kyrin() && Utils.inlist(saleId, toKyrinOnSale));
-        P_ERC20(PiggyERC20).transferFrom(sender, address(this), sales[saleId].value);
+        cnt = sales[saleId].longTerm == true ? cnt : 1;
+        P_ERC20(PiggyERC20).transferFrom(sender, address(this), sales[saleId].value * cnt);
         if(sender == P_V(PiggyVerse).kyrin()){  // sender: Kyrin
             if(sales[saleId].longTerm == false){
                 Utils.deleteIdFromList(saleId, toKyrinOnSale);
@@ -223,7 +225,8 @@ contract PiggyAwards {
         uint awardId = awardCnt++;
         Award memory award;
         award.name = sales[saleId].name;
-        award.cnt = sales[saleId].cnt;
+        award.cnt = sales[saleId].cnt * cnt;
+        award.left = award.cnt;
         awards[awardId] = award;
         if(sender == P_V(PiggyVerse).kyrin()){  // sender: Kyrin
             toKyrin.push(awardId);
@@ -241,6 +244,7 @@ contract PiggyAwards {
         Award memory award;
         award.name = name;
         award.cnt = cnt;
+        award.left = cnt;
         awards[awardId] = award;
         if(sender == P_V(PiggyVerse).effie()){
             toKyrin.push(awardId);
@@ -251,32 +255,39 @@ contract PiggyAwards {
         emit AwardAdded(awardId, name, cnt);
     }
 
-    function finishAward(uint awardId, address sender) public onlyPiggyVerse {
+    function addAwardCnt(uint awardId, uint cnt, address sender) public onlyPiggyVerse {
         require(sender == P_V(PiggyVerse).effie() || sender == P_V(PiggyVerse).kyrin());
         if(sender == P_V(PiggyVerse).effie()){
             require(Utils.inlist(awardId, toKyrin));
-            Utils.deleteIdFromList(awardId, toKyrin);
-            toKyrinDone.push(awardId);
         }
         else {
             require(Utils.inlist(awardId, toEffie));
-            Utils.deleteIdFromList(awardId, toEffie);
-            toEffieDone.push(awardId);
         }
-        emit AwardFinished(awardId);
+        require(cnt > 0);
+        awards[awardId].cnt += cnt;
+        awards[awardId].left += cnt;
+        emit AwardCntAdded(awardId, cnt);
     }
 
-    function changeAwardCnt(uint awardId, uint cnt, address sender) public onlyPiggyVerse {
+    function finishAward(uint awardId, uint cnt, address sender) public onlyPiggyVerse {
         require(sender == P_V(PiggyVerse).effie() || sender == P_V(PiggyVerse).kyrin());
+        require(awards[awardId].left >= cnt);
         if(sender == P_V(PiggyVerse).effie()){
-            require(Utils.inlist(awardId, toKyrin));
+            require(Utils.inlist(awardId, toEffie));
+            if(awards[awardId].left == cnt){
+                Utils.deleteIdFromList(awardId, toEffie);
+                toEffieDone.push(awardId);
+            }
+            awards[awardId].left -= cnt;
         }
         else {
-            require(Utils.inlist(awardId, toEffie));
+            require(Utils.inlist(awardId, toKyrin));
+            if(awards[awardId].left == cnt){
+                Utils.deleteIdFromList(awardId, toKyrin);
+                toKyrinDone.push(awardId);
+            }
+            awards[awardId].left -= cnt;
         }
-        require(cnt != awards[awardId].cnt);
-        Award storage award = awards[awardId];
-        award.cnt = cnt;
-        emit AwardCntChanged(awardId, cnt);
+        emit AwardFinished(awardId, uint cnt);
     }
 }
